@@ -1,0 +1,222 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // =========================================================================
+    // PRODUCTION HARDENED ZERO-TRUST ROLE-BASED ACCESS CONTROL (RBAC) RULES
+    // =========================================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function existsUserData() {
+      return request.auth != null && exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    function getUserRole() {
+      return existsUserData() ? getUserData().role : (
+        request.auth != null && request.auth.token != null && request.auth.token.email != null ? (
+          request.auth.token.email in [
+            'admin@smartedu.vn', 
+            'dungdirector@smartedu.com', 
+            'vietdung.owner@smartedu.com', 
+            'chienchieu769@gmail.com'
+          ] ? 'ADMIN' : (
+            request.auth.token.email in [
+              'giaovu@smartedu.vn', 
+              'giaovu01@smartedu.vn', 
+              'hoanganh.staff@smartedu.com'
+            ] ? 'ACADEMIC_STAFF' : (
+              request.auth.token.email in [
+                'ketoan@smartedu.vn', 
+                'ketoan01@smartedu.vn', 
+                'thuyfinance@smartedu.com'
+              ] ? 'ACCOUNTANT' : ''
+            )
+          )
+        ) : ''
+      );
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (getUserRole() == 'ADMIN' || getUserRole() == 'OWNER');
+    }
+    
+    function isAcademicStaff() {
+      return isSignedIn() && getUserRole() == 'ACADEMIC_STAFF';
+    }
+    
+    function isAccountant() {
+      return isSignedIn() && getUserRole() == 'ACCOUNTANT';
+    }
+    
+    function isTeacher() {
+      return isSignedIn() && getUserRole() == 'TEACHER';
+    }
+    
+    function isStudent() {
+      return isSignedIn() && getUserRole() == 'STUDENT';
+    }
+    
+    function isParent() {
+      return isSignedIn() && getUserRole() == 'PARENT';
+    }
+    
+    function isStaff() {
+      return isAdmin() || isAcademicStaff() || isAccountant() || isTeacher();
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{id} {
+      allow read: if true;
+      allow create: if isSignedIn() && (request.auth.uid == id || isAdmin() || isAcademicStaff());
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        isAcademicStaff() ||
+        (request.auth.uid == id && request.resource.data.role == resource.data.role && request.resource.data.status == resource.data.status)
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /subjects/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /teachers/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /classes/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /parents/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /students/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /classEnrollments/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /invoices/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAccountant();
+    }
+
+    match /payments/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAccountant();
+    }
+
+    match /teacherAssignments/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /rooms/{id} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        isAcademicStaff() || 
+        isTeacher() || 
+        isStudent() || 
+        isParent()
+      ) && !isAccountant();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /schedules/{id} {
+      allow read: if isSignedIn() && (
+        isAdmin() || 
+        isAcademicStaff() || 
+        isTeacher() || 
+        isStudent() || 
+        isParent()
+      ) && !isAccountant();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    match /attendance/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (isAdmin() || isAcademicStaff() || isTeacher()) && !isAccountant();
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        isAcademicStaff() || 
+        (isTeacher() && resource.data.sessionStatus != 'LOCKED')
+      ) && !isAccountant();
+      allow delete: if isAdmin() || isAcademicStaff();
+    }
+
+    match /scores/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (isAdmin() || isAcademicStaff() || isTeacher()) && !isAccountant();
+      allow update: if isSignedIn() && (
+        isAdmin() || 
+        isAcademicStaff() || 
+        (isTeacher() && resource.data.status != 'LOCKED')
+      ) && !isAccountant();
+      allow delete: if isAdmin() || isAcademicStaff();
+    }
+
+    match /expenses/{id} {
+      allow read, write: if isAdmin() || isAccountant();
+    }
+
+    match /homeworks/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isAcademicStaff() || isTeacher();
+    }
+
+    match /employees/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    match /notifications/{id} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn();
+    }
+
+    match /auditLogs/{id} {
+      allow read: if isAdmin();
+      allow create: if isSignedIn();
+      allow update, delete: if false;
+    }
+
+    match /reports/{id} {
+      allow read: if isAdmin() || isAcademicStaff() || isAccountant();
+      allow write: if isAdmin() || isAcademicStaff();
+    }
+
+    // AI Predictions collection (Accountant strictly denied)
+    match /ai_predictions/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && !isAccountant();
+      allow update: if isSignedIn() && (isAdmin() || isAcademicStaff() || isTeacher());
+      allow delete: if isAdmin();
+    }
+
+    // Model Registry collection
+    match /model_versions/{id} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}

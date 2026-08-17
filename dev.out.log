@@ -1,0 +1,17 @@
+
+> react-example@0.0.0 dev
+> tsx server.ts
+
+[Smart Education Server] Running on http://0.0.0.0:3000
+[2m2:36:36 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msecurity_spec.md[22m
+[2m2:36:37 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdocs/IMPLEMENTATION_STATUS.md[22m
+[2m2:36:38 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdocs/qa/login-role-routing-diagnostic.md[22m
+[2m2:36:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdocs/qa/04_4_1_data_consistency_audit.md[22m
+[2m2:36:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mdocs/archive/auth-migrations/ARCHIVED_firebase_auth_provider_verification.md[22m
+[2m2:36:40 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m2:36:41 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/App.tsx, /src/index.css[22m
+[2m2:36:42 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/src/components/FirstLoginModal.tsx, /src/index.css[22m
+[2m2:52:59 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2msrc/ai/service/student_score_service.ts[22m
+[2m3:00:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mml/models/model_metadata.json[22m
+[2m3:00:39 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mml/models/model_metadata.json[22m
+[2m3:00:53 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mpage reload [39m[2mml/models/student_score_model-1.joblib[22m
